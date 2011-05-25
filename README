@@ -1,0 +1,5 @@
+Readme goes here...
+
+Notes:
+How to add a new project via phpuc:
+    phpuc project --version-control svn --username "cruisecontrol" --password "password_here" --version-control-url svn://svn.domain.com/repository/project-name/trunk --test-case MyProjectTestSuite --test-dir "/opt/cruisecontrol/projects/my-project/source/unit_tests" --test-file "MyProjectTestSuite.php" --project-name MyProject /opt/cruisecontrol
