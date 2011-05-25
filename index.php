@@ -10,8 +10,7 @@
 
 include('/var/apps/list/lib/List/AutoLoader.php');
 $loader = List\AutoLoader::getInstance();
-$loader->registerNamespace('Zend','/var/apps/list/lib/Zend/');
-$loader->register();
+$loader->registerNamespace('Zend','/var/apps/list/lib/Zend/')->register();
 
 $front = new List/FrontController();
 $front->run('/var/apps/listerthingamabob/packages/');
