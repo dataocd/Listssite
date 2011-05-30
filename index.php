@@ -11,6 +11,7 @@
 include('/opt/local/apache2/www/code/ListFramework/AutoLoader.php');
 
 $autoloader = Lists\AutoLoader::getInstance();
+$autoloader->registerNamespace('REST','/opt/local/apache2/www/code/Packages/REST');
 $autoloader->register();
 
 Lists\FrontController::run();
