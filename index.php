@@ -14,6 +14,6 @@ $autoloader = Lists\AutoLoader::getInstance();
 $autoloader->registerNamespace('REST','/www/code/ListPackages/REST');
 $autoloader->register();
 
-Lists\FrontController::run();
+Lists\FrontController::run('/Listssite');
 // something getting echoed out here...
 ?>
