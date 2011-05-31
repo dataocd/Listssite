@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+<cruisecontrol>
+
+    <project name="Listssite" buildafterfailed="false">
+        <propertyfilelabelincrementer propertyfile="projects/${project.name}/source/build.number" 
+                                      propertyname="build.number"
+                                      preBuildIncrementer="true" />
+
+        <property file="projects/${project.name}/config.properties" />
+
+        <plugin name="gitbootstrapper" classname="net.sourceforge.cruisecontrol.bootstrappers.GitBootstrapper" />
+        <plugin name="git" classname="net.sourceforge.cruisecontrol.sourcecontrols.Git" />
+
+        <listeners>
+          <currentbuildstatuslistener file="logs/${project.name}/status.txt"/>
+        </listeners>
+
+        <modificationset>
+            <git localWorkingCopy="projects/${project.name}/source/"/>
+        </modificationset>
+
+        <bootstrappers>
+            <gitbootstrapper localWorkingCopy="projects/${project.name}/source/" />
+        </bootstrappers>
+
+        <schedule interval="60">
+            <ant anthome="apache-ant-1.7.0" 
+                buildfile="projects/${project.name}/source/build.xml"/>
+        </schedule>
+
+        <log dir="logs/${project.name}">
+            <merge dir="projects/${project.name}/build/logs/"/>
+        </log>
+
+        <publishers>
+
+            <!-- Generates the different metric charts with the phpUnderControl ezcGraph extension. -->
+            <execute command="phpuc graph logs/${project.name} artifacts/${project.name}"/>
+            
+            <execute command="phpcb --log projects/${project.name}/build/logs 
+                                    --source projects/${project.name}/source 
+                                    --output projects/${project.name}/build/phpcb" />
+      
+            <artifactspublisher dir="projects/${project.name}/build/phpcb" 
+                                dest="artifacts/${project.name}" 
+                                subdirectory="php-code-browser" />
+
+            <!-- Copies the generated api documentation into project artifacts directory.-->
+            <artifactspublisher dir="projects/${project.name}/build/api" 
+                                dest="artifacts/${project.name}"
+                                subdirectory="api"/>
+            
+            <!-- Copies the generated code coverage report into project artifacts directory.  -->
+            <artifactspublisher dir="projects/${project.name}/build/coverage" 
+                                dest="artifacts/${project.name}" 
+                                subdirectory="coverage"/>
+
+            <artifactspublisher dir="projects/${project.name}/build/dist"
+                                dest="artifacts/${project.name}"
+                                subdirectory="dist" />
+                          
+
+            <!-- Sends simple text emails after a project build. For nicer html emails, checkout the original CruiseControl documentation.-->
+            <email mailhost="${smtp.hostname}"
+                   mailport="${smtp.portname}"
+                   usessl="true"
+                   username="${smtp.username}"
+                   password="${smtp.password}"
+                   returnaddress="${smtp.username}"
+                   buildresultsurl="http://dataocd.com/cruisecontrol/buildresults/${project.name}"
+                   skipusers="true" 
+                   spamwhilebroken="true">
+                   <always address="buildstatus@dataocd.com"/>
+            </email>
+        </publishers>
+
+    </project>
+  
+</cruisecontrol>

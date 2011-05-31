@@ -1,0 +1,4 @@
+smtp.hostname=smtp.gmail.com
+smtp.portname=465
+smtp.username=username
+smtp.password=password

@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+  <!--
+  1. 'clean' Clean old project build artefacts
+  2. 'checkout' Update project working copy
+  3. 'php-documentor' Generate api documentation
+  4. 'php-codesniffer' Check for coding violations.
+  4. 'pdepend' Code dependency information.
+  4. 'phpcpd' Copy-paste detection.
+  4. 'phpcpd' Mess detection.
+  5. 'phpunit' Execute unit tests, generate metrics, coverage etc. 
+  -->
+
+<project name="Listssite" default="build" basedir=".">
+    <property file="build.properties" />
+    <property name="builddir" value="${basedir}/../build" />
+
+<!-- BUILD TARGET -->
+    <target name="build" depends="clean,init,update,lint,php-documentor,php-codesniffer,pdepend,phpcpd,phpmd,phpunit" />
+
+
+<!-- INIT TARGET -->    
+    <target name="init">
+        <mkdir dir="${builddir}" />
+        <mkdir dir="${builddir}/api" />
+        <mkdir dir="${builddir}/charts" />
+        <mkdir dir="${builddir}/coverage" />
+        <mkdir dir="${builddir}/dist" />
+        <mkdir dir="${builddir}/graph" />
+        <mkdir dir="${builddir}/logs" />
+        <mkdir dir="${builddir}/phpcb" />
+        <buildnumber file="${basedir}/build.number"/>
+        <!--
+        <exec executable="git">
+            <arg line="clone git://github.com/JamesWPhillips/lists.git source" />
+        </exec>
+        -->
+    </target>
+
+<!-- CLEAN TARGET -->
+    <target name="clean">
+        <delete dir="${builddir}" />
+    </target>
+
+
+<!-- UPDATE -->
+    <target name="update">
+        <exec executable="git" dir="${basedir}"><arg line="pull" /></exec>
+    </target>
+
+<!-- LINT -->
+    <target name="lint">
+        <apply executable="php" logerror="true" failonerror="true">
+            <arg value="-l" />
+            <fileset dir="${basedir}">
+                <include name="./**/*.php" />
+            </fileset>
+        </apply>
+    </target>
+
+<!-- PHP-DOCUMENTOR //-i paths-to-ignore1,paths-to-ignore2-->
+    <target name="php-documentor" depends="init">
+        <exec executable="phpdoc" dir="${basedir}">
+            <arg line="-ue on 
+                       --target ${builddir}/api 
+                       --templatebase /usr/share/php/data/phpUnderControl/data/phpdoc/ 
+                       --output HTML:Phpuc:phpuc
+                       --directory ${basedir}
+                        -q"/>
+        </exec>
+    </target>
+
+<!-- PHP-CODESNIFFER -->
+    <target name="php-codesniffer" depends="init">
+        <exec executable="phpcs">
+            <arg line="--report=checkstyle 
+                       --standard=PEAR 
+                       --report-file=${builddir}/logs/checkstyle.xml
+                       ${basedir}"/>
+        </exec>
+    </target>
+
+<!--PDEPEND -->
+    <target name="pdepend" depends="init">
+        <exec executable="pdepend" failonerror="false">
+            <arg line="--summary-xml=${builddir}/logs/pdepend.xml
+                       --jdepend-xml=${builddir}/logs/jdepend.xml
+                       --jdepend-chart=${builddir}/charts/jdepend.svg
+                       --overview-pyramid=${builddir}/charts/overview-pyramid.svg
+                       --coderank-mode=inheritance,property,method
+                       ${basedir}" />
+        </exec>
+    </target>
+
+<!-- PHPCPD -->
+    <target name="phpcpd" depends="init">
+        <exec executable="phpcpd" failonerror="false">
+            <arg line="--log-pmd ${builddir}/logs/pmd-cpd.xml
+                       ${basedir}" />
+        </exec>
+    </target>
+
+<!-- PHPMD  -->
+    <target name="phpmd" depends="init">
+        <exec executable="phpmd" failonerror="false">
+            <arg line="${basedir}
+                       xml
+                       codesize,unusedcode,naming
+                       --reportfile ${builddir}/logs/pmd.xml" />
+        </exec>
+    </target>
+      
+<!-- PHPUNIT  -->
+    <target name="phpunit">
+        <exec executable="phpunit" failonerror="false" dir="${basedir}/tests">
+            <arg line="--process-isolation
+                       --log-junit ${builddir}/logs/junit.xml
+                       --coverage-clover ${builddir}/logs/coverage.xml
+                       --coverage-html ${builddir}/coverage" />
+        </exec>
+    </target>
+    
+<!--Update build number, need to try this in the future. Need to see about repushing the build number into git as well
+    <target name="update-version">
+	   <propertyset id="tdate"></propertyset>
+	   <tstamp>
+	       <format property="tdate" pattern="yyyyMMdd"/>
+	   </tstamp>
+	   <buildnumber file="build.number"/>
+	   <echo>updating version to current datetime: ${tdate}</echo>
+	   <replaceregexp byline="true">
+            <regexp pattern="public static const BUILD_DATE: String = \'([0-9]+)'"/>
+	       	<substitution expression="public static const BUILD_DATE: String = '${tdate}'"/>
+    		<fileset dir="src/it/sephiroth/somestuff">
+			     <include name="Library.as"/>
+	       	</fileset>
+    	</replaceregexp>
+	
+    	<replaceregexp byline="true">
+	       	<regexp pattern="public static const BUILD_NUMBER: String = \'([0-9\.]+)'"/>
+    		<substitution expression="public static const BUILD_NUMBER: String = '${build.number}'"/>
+	       	<fileset dir="src/it/sephiroth/somestuff">
+	   	  	   <include name="Library.as"/>
+    	   	</fileset>
+    	</replaceregexp>
+    </target>
+     -->
+</project>

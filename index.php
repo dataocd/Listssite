@@ -8,10 +8,10 @@
 //                  /config  << need to have some config stuff some day
 //This is where the magic happens...
 
-include('/opt/local/apache2/www/code/ListFramework/AutoLoader.php');
+include('/www/code/ListFramework/AutoLoader.php');
 
 $autoloader = Lists\AutoLoader::getInstance();
-$autoloader->registerNamespace('REST','/opt/local/apache2/www/code/Packages/REST');
+$autoloader->registerNamespace('REST','/www/code/ListPackages/REST');
 $autoloader->register();
 
 Lists\FrontController::run();
